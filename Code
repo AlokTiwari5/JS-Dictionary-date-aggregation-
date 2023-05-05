@@ -1,0 +1,46 @@
+function solution(D) {
+  // Define the days of the week in order
+  const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  
+  // Create an empty dictionary to hold the sums for each day
+  let sums = {};
+  for (let i = 0; i < weekdays.length; i++) {
+    sums[weekdays[i]] = 0;
+  }
+  
+  // Iterate over the keys in the input dictionary
+  const keys = Object.keys(D).sort();
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    const value = D[key];
+    
+    // Parse the date from the key and get the day of the week
+    const date = new Date(key);
+    const day = weekdays[date.getUTCDay()];
+    
+    // Add the value to the sum for that day
+    sums[day] += value;
+    
+    // Handle missing days by interpolating between neighboring days
+    if (i < keys.length - 1) {
+      const nextKey = keys[i+1];
+      const nextDate = new Date(nextKey);
+      const daysBetween = Math.round((nextDate - date) / (24 * 60 * 60 * 1000));
+      
+      if (daysBetween > 1) {
+        const prevDay = weekdays[(date.getUTCDay() + 6) % 7];
+        const nextDay = weekdays[nextDate.getUTCDay()];
+        const prevSum = sums[prevDay];
+        const nextSum = sums[nextDay];
+        
+        for (let j = 1; j < daysBetween; j++) {
+          const missingDay = weekdays[(date.getUTCDay() + j) % 7];
+          const missingSum = prevSum + (j * (nextSum - prevSum) / daysBetween);
+          sums[missingDay] = missingSum;
+        }
+      }
+    }
+  }
+  
+  return sums;
+}
